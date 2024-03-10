@@ -45,9 +45,7 @@ namespace AuthApp.Controllers
 
           
             await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.OWNER));
-
             await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.ADMIN));
-
             await _roleManager.CreateAsync(new IdentityRole(StaticUserRoles.USER));
             // You might want to handle the result of role creation and return an appropriate response.
             return Ok("Roles seeded successfully.");
