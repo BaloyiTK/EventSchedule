@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using EventSchedule.Data;
-using EventSchedule.Models.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using EventSchedule.Data;
+using EventSchedule.Models.Domain;
+using EventSchedule.Models.DTO;
+using EventSchedule.DTOs;
 
 namespace EventSchedule.Controllers
 {
@@ -23,7 +24,6 @@ namespace EventSchedule.Controllers
         }
 
         [HttpGet]
-
         public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
         {
             return await _context.Events.ToListAsync();
@@ -44,8 +44,33 @@ namespace EventSchedule.Controllers
 
         [HttpPost]
         [Authorize(Roles = "admin, editor")]
-        public async Task<ActionResult<Event>> CreateEvent(Event @event)
+        public async Task<ActionResult<Event>> CreateEvent(EventResquestDto eventRequest)
         {
+            var userName = User.Identity.Name;
+            var firstName = userName.Split(' ')[0];
+            var capitalizedFirstName = char.ToUpper(firstName[0]) + firstName.Substring(1);
+
+            // Convert UTC time to South African time zone
+            var saTimeZone = TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time");
+            var saTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, saTimeZone);
+            Console.WriteLine(saTimeZone);
+            var @event = new Event
+            {
+                Id = Guid.NewGuid(),
+                Title = eventRequest.Title,
+                Start = TimeZoneInfo.ConvertTimeFromUtc(eventRequest.Start, saTimeZone),
+                Duration = eventRequest.Duration,
+                Description = eventRequest.Description,
+                Category = eventRequest.Category,
+                Price = eventRequest.Price,
+                CourseCode = eventRequest.CourseCode,
+                ExamCode = eventRequest.ExamCode,
+                CreatedAt = saTime,
+                CreatedBy = capitalizedFirstName,
+                UpdatedAt = saTime,
+                UpdatedBy = capitalizedFirstName
+            };
+
             _context.Events.Add(@event);
             await _context.SaveChangesAsync();
 
@@ -54,15 +79,37 @@ namespace EventSchedule.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "admin, editor")]
-
-        public async Task<IActionResult> UpdateEvent(Guid id, Event @event)
+        public async Task<IActionResult> UpdateEvent(Guid id, EventResquestDto eventRequest)
         {
-            if (id != @event.Id)
+            var existingEvent = await _context.Events.FindAsync(id);
+
+            if (existingEvent == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(@event).State = EntityState.Modified;
+            var userName = User.Identity.Name;
+            var firstName = userName.Split(' ')[0];
+            var capitalizedFirstName = char.ToUpper(firstName[0]) + firstName.Substring(1);
+
+            // Convert UTC time to South African time zone
+            var saTimeZone = TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time");
+            var saTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, saTimeZone);
+
+            Console.WriteLine(saTimeZone);
+            Console.WriteLine(saTime);
+
+            // Update properties of the existing event based on the eventRequest
+            existingEvent.Title = eventRequest.Title;
+            existingEvent.Start = TimeZoneInfo.ConvertTimeFromUtc(eventRequest.Start, saTimeZone);
+            existingEvent.Duration = eventRequest.Duration;
+            existingEvent.Description = eventRequest.Description;
+            existingEvent.Category = eventRequest.Category;
+            existingEvent.Price = eventRequest.Price;
+            existingEvent.CourseCode = eventRequest.CourseCode;
+            existingEvent.ExamCode = eventRequest.ExamCode;
+            existingEvent.UpdatedAt = saTime;
+            existingEvent.UpdatedBy = capitalizedFirstName;
 
             try
             {

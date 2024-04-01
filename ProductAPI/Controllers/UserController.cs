@@ -39,7 +39,7 @@ namespace EventSchedule.Controllers
 
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "admin")]
+        // [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateUser(Guid id, User user)
         {
             // Find the user in the database by id
@@ -59,8 +59,8 @@ namespace EventSchedule.Controllers
             userToUpdate.Role = user.Role;
             // Update other properties as needed
 
-            // Check if the password field in the incoming user object is not empty
-            if (!string.IsNullOrEmpty(user.Password))
+            // Check if the password field in the incoming user object is not empty and if it's different from the current password
+            if (!string.IsNullOrEmpty(user.Password) && user.Password != userToUpdate.Password)
             {
                 // Hash the password before updating it
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
@@ -88,6 +88,7 @@ namespace EventSchedule.Controllers
             // Return a 204 No Content response to indicate success
             return NoContent();
         }
+
 
 
         [HttpDelete("{id}")]

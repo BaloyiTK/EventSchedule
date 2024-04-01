@@ -1,12 +1,9 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace EventSchedule.Models.Domain
+﻿
+namespace EventSchedule.DTOs
 {
-    public class Event
+    public class EventResquestDto
     {
-        [Key]
-        public Guid Id { get; set; }
+       
         public string Title { get; set; }
         public DateTime Start { get; set; }
         public int Duration { get; set; }
@@ -15,9 +12,5 @@ namespace EventSchedule.Models.Domain
         public decimal Price { get; set; }
         public string CourseCode { get; set; }
         public string ExamCode { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public string CreatedBy { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public string UpdatedBy { get; set; }
     }
 }

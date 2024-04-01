@@ -107,6 +107,8 @@ namespace EventSchedule.Controllers
                     new Claim(ClaimTypes.Name, user.Username),
                     new Claim(ClaimTypes.Role, user.Role),
                     new Claim("UserId", user.Id.ToString()),
+                    new Claim("FirstName", user.Firstname.ToString()),
+                    new Claim("LastName", user.Lastname.ToString()),
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 Issuer = _configuration["JWT:ValidIssuer"],
